@@ -8,7 +8,7 @@ router.post("/create_role", async (req, res) => {
 
     if (!role) {
       return res.status(400).json({
-        message: "Role is required"
+        message: "Role is required",
       });
     }
 
@@ -18,29 +18,29 @@ router.post("/create_role", async (req, res) => {
     request.input("role", sql.VarChar, role);
 
     const checkRole = await request.query(`
-      SELECT id FROM role WHERE role = @role
+      SELECT id FROM Role WHERE role = @role
     `);
 
     if (checkRole.recordset.length > 0) {
       return res.status(400).json({
-        message: "Role already exists"
+        message: "Role already exists",
       });
     }
 
     await request.query(`
-      INSERT INTO role (role)
+      INSERT INTO Role (role)
       VALUES (@role)
     `);
 
     res.status(201).json({
-      message: "Role created successfully"
+      message: "Role created successfully",
     });
 
   } catch (err) {
     console.error("CREATE ROLE ERROR", err);
     res.status(500).json({
       message: "Role creation failed",
-      error: err.message
+      error: err.message,
     });
   }
 });

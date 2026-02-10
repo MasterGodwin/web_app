@@ -154,6 +154,4 @@ router.delete("/", async (req, res) => {
     res.status(500).json({ message: "Delete failed", error: err.message });
   }
 });
-
-
 module.exports = router;

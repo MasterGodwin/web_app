@@ -3,7 +3,7 @@ const router = express.Router();
 const { sql, config } = require("../db");
 const bcrypt = require("bcrypt");
 
-router.post("/create_admin", async (req, res) => {
+router.post("/admin", async (req, res) => {
   try {
     const { name, password, role_id } = req.body;
 

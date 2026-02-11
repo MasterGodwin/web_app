@@ -11,6 +11,7 @@ const config = {
     trustServerCertificate: true
   }
 };
+const pool = new sql.ConnectionPool(config);
 
 const poolPromise = sql.connect(config)
   .then(pool => {

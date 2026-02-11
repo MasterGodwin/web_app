@@ -3,7 +3,6 @@ const router = express.Router();
 const { sql, config } = require("../db");
 const bcrypt = require("bcrypt");
 const auth = require("../middleware/auth");
-const AdminOnly = require("../middleware/AdminAccess");
 
 router.post("/create", auth, async (req, res) => {
   const {

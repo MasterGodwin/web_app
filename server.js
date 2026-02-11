@@ -2,8 +2,7 @@ require("dotenv").config();
 const express = require("express");
 
 const app = express();
-app.use(express.json()); // ✅ THIS IS REQUIRED
-app.use(express.urlencoded({ extended: true })); // optional but safe
+app.use(express.json()); 
 
 const cors = require("cors");
 app.use(cors());

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { sql,poolPromise } = require("../db");
+const { sql,poolPromise,config } = require("../db");
 const bcrypt = require("bcrypt");
 const auth = require("../middleware/auth");
 const mssql=require("mssql")
@@ -65,7 +65,7 @@ router.get("/view",auth,async(req,res)=>{
     const pool=await sql.connect(config);
     const result=await pool.request()
         .input("Sub_id",sql.Int,sub_id)
-        .query(`select * from Users5 where Sub_id=@Sub_id`)
+        .query(`select * from Users5 `)
     
     res.json(result.recordset);
 });
@@ -73,84 +73,89 @@ router.get("/view",auth,async(req,res)=>{
 //Upate User
 router.put("/update/:id", auth, async (req, res) => {
   try {
-    const userId = req.params.id;       // Users5 table user id
-    const sub_id = req.user.sub_id;     // JWT la irukkura subscriber id
-
+    
+    const userId = parseInt(req.params.id);
+    const sub_id = req.user.sub_id;
+    console.log("TOKEN SUB_ID 👉", sub_id);
+console.log("USER ID 👉", userId);
+    console.log("check:" ,req.body)
     const {
-            Pan_number,	
-            role_id,	
-            Name,	
-            Mob_number,	
-            City,	
-            State,	
-            user_name,	
-            password
-        } = req.body;
+      Pan_number,
+      role_id,
+      Name,
+      Mob_number,
+      City,
+      State,
+      user_name,
+      password
+    } = req.body;
 
     const pool = await sql.connect(config);
 
-    // First check: user belongs to this subscriber
+    // Check ownership
     const check = await pool.request()
       .input("id", sql.Int, userId)
       .input("Sub_id", sql.Int, sub_id)
       .query(`
-        SELECT id FROM Users5 
-        WHERE id = @id AND Sub_id = @Sub_id
+        SELECT id FROM Users5
+        WHERE id=@id 
       `);
 
-    if (check.recordset.length === 0) {
+    if (!check.recordset.length) {
       return res.status(403).json({
         message: "You are not allowed to update this user"
       });
     }
 
-    let hashedPassword = null;
+    // If password exists hash it
+    let query = `
+      UPDATE Users5 SET
+        Name=@Name,
+        Pan_number=@Pan_number,
+        Mob_number=@Mob_number,
+        City=@City,
+        State=@State,
+        user_name=@user_name,
+        role_id=@role_id
+    `;
+
+    const request = pool.request()
+      .input("id", sql.Int, userId)
+      .input("Sub_id", sql.Int, sub_id)
+      .input("role_id", sql.Int, role_id)
+      .input("Name", sql.VarChar, Name)
+      .input("Mob_number", sql.VarChar, Mob_number)
+      .input("Pan_number", sql.VarChar, Pan_number)
+      .input("City", sql.VarChar, City)
+      .input("State", sql.VarChar, State)
+      .input("user_name", sql.VarChar, user_name);
+
     if (password) {
-      hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, 10);
+      query += `, password=@password`;
+      request.input("password", sql.VarChar, hashedPassword);
     }
 
-    // ✅ Update
-    await pool.request()
-        .input("id", sql.Int, userId)   
-        .input("role_id", sql.Int, role_id)
-        .input("Sub_id", sql.Int, sub_id)
-        .input("Name", sql.VarChar, Name)
-        .input("Mob_number", sql.VarChar, Mob_number)
-        .input("Pan_number", sql.VarChar, Pan_number)
-        .input("City", sql.VarChar, City)
-        .input("State", sql.VarChar, State)
-        .input("user_name", sql.VarChar, user_name)
-        .input("password", sql.VarChar, hashedPassword)
-        .query(` UPDATE Users5 SET
-            Name=@Name,
-            Pan_number=@Pan_number,
-            Mob_number=@Mob_number,
-            City=@City,
-            State=@State,
-            user_name=@user_name,
-            role_id=@role_id,
-            password=@password
-            WHERE id=@id AND Sub_id=@Sub_id
-      `);
+    query += ` WHERE id=@id AND Sub_id=@Sub_id`;
 
-    res.json({
-      message: "User updated successfully"
-    });
+    await request.query(query);
+
+    res.json({ message: "User updated successfully " });
 
   } catch (err) {
-  console.error("UPDATE ERROR 👉", err.message);
-  res.status(500).json({ error: err.message });
-}
+    console.error("UPDATE ERROR 👉", err.message);
+    res.status(500).json({ error: err.message });
+  }
 });
+
 
 // Delete User
 router.delete("/delete/:id",auth,async (req, res) => {
     const userId = req.params.id;
-    const sub_id = req.user.sub_id;
 
     const check = await sql.query`
       SELECT id FROM Users5
-      WHERE id = ${userId} AND Sub_id = ${sub_id}
+      WHERE id = ${userId} 
     `;
 
     if (!check.recordset.length) {
@@ -168,7 +173,7 @@ router.delete("/delete/:id",auth,async (req, res) => {
 );
 
 // Product Add
-router.post("/users/product/add", auth, async (req, res) => {
+router.post("/product/add", auth, async (req, res) => {
   try {
     console.log("TOKEN USER:", req.user);
 

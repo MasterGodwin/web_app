@@ -3,8 +3,6 @@ const router = express.Router();
 const { sql,poolPromise,config } = require("../db");
 const bcrypt = require("bcrypt");
 const auth = require("../middleware/auth");
-const mssql=require("mssql")
-
 
 // Create User
 router.post("/create", auth, async (req, res) => {

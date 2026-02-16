@@ -3,17 +3,35 @@ const router = express.Router();
 const { sql, config } = require("../db");
 const bcrypt = require("bcrypt");
 
-router.post("/admin", async (req, res) => {
+router.post("/create", async (req, res) => {
   try {
-    const { name, password, role_id } = req.body;
-
-    if (!name || !password || !role_id) {
+    const { name, email, password, role_id } = req.body   ;
+    console.log("recive",email)
+    if (!name || !email || !password || !role_id) {
       return res.status(400).json({
-        message: "name, password and role_id are required"
+        message: "name, email, password and role_id are required"
       });
     }
 
     const pool = await sql.connect(config);
+
+    const emailCheck = await pool.request()
+      .input("email", sql.VarChar, email)
+      .query(`
+    SELECT email FROM Admin WHERE email = @email
+    UNION
+    SELECT email FROM Subscriber WHERE email = @email
+    UNION
+    SELECT email FROM Users5 WHERE email = @email
+  `);
+
+    if (emailCheck.recordset.length > 0) {
+      return res.status(400).json({
+        message: "Email already exists in system"
+      });
+    }
+
+
     const request = pool.request();
 
     // role check
@@ -29,11 +47,12 @@ router.post("/admin", async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     request.input("username", sql.VarChar, name);
+    request.input("email",sql.VarChar,email);
     request.input("password", sql.VarChar, hashedPassword);
 
     await request.query(`
-      INSERT INTO Admin (username, password, role_id)
-      VALUES (@username, @password, @role_id)
+      INSERT INTO Admin (username,email,password, role_id)
+      VALUES (@username,@email, @password, @role_id)
     `);
 
     res.status(201).json({ message: "Admin created successfully" });

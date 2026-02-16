@@ -12,12 +12,19 @@ const create_admin = require("./routes/CreateAdmin");
 const create_Sub = require("./routes/CreateSub")
 const create_user = require("./routes/CreateUser")
 const create_login = require("./routes/login");
- 
+
+
+app.use("/api/uploads", express.static("uploads")); // Serve uploaded files
 app.use("/api/roles", create_role); 
 app.use("/api/admin", create_admin);
 app.use("/api/subscriber" , create_Sub);
 app.use("/api/users",create_user);
-app.use("/api/", create_login);
+app.use("/api", create_login);
+
+const path = require("path");
+
+app.use("/uploads",express.static(path.join(__dirname, "uploads")));
+
 
 const PORT = process.env.PORT;
 app.listen(PORT, () => {

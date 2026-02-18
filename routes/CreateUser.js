@@ -165,7 +165,7 @@ router.put("/update/:id", auth, async (req, res) => {
     res.json({ message: "User updated successfully " });
 
   } catch (err) {
-    console.error("UPDATE ERROR 👉", err.message);
+    console.error("UPDATE ERROR :", err.message);
     res.status(500).json({ error: err.message });
   }
 });
@@ -227,10 +227,10 @@ router.post("/product/add", auth, upload.single("image"), async (req, res) => {
         VALUES (@product_name, @price, @qty, @image, @model, @user_id)
       `);
 
-    res.json({ message: "Product added successfully ✅" });
+    res.json({ message: "Product added successfully " });
 
   } catch (err) {
-  console.log("SQL FULL ERROR 👉", err);
+  console.log("SQL FULL ERROR :", err);
   res.status(500).json({
     message: err.message,
     sqlError: err
@@ -297,7 +297,7 @@ router.put("/product/update/:id",auth,upload.single("image"),async (req, res) =>
 
       await request.query(query);
 
-      res.json({ message: "Product updated successfully ✅" });
+      res.json({ message: "Product updated successfully " });
 
     } catch (err) {
       console.log("UPDATE ERROR 👉", err);

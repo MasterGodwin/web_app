@@ -3,7 +3,7 @@ const router = express.Router();
 const { sql, config } = require("../db");
 const bcrypt = require("bcrypt");
 const auth = require("../middleware/auth");
-const role = require("../middleware/role")
+
 
 // Create Subscriber
 router.post("/create",  auth, async (req, res) => {
@@ -72,7 +72,7 @@ router.get("/view",auth,async(req,res)=>{
   res.json(result.recordset);
 });
 
-// Update Date
+// Update Data
 router.put("/update/:id", auth, async (req, res) => {
   try {
     const id = parseInt(req.params.id);

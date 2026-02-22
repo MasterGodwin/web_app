@@ -1,5 +1,11 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
+
+const app = express();
+app.use(express.json()); 
+app.use(cors());
+
 const create_role = require("./routes/CreateRole"); 
 const create_admin = require("./routes/CreateAdmin");
 const create_Sub = require("./routes/CreateSub")
@@ -7,12 +13,6 @@ const create_user = require("./routes/CreateUser")
 const Parking = require("./routes/Parking");
 const Driver = require("./routes/MasterDrivers");
 const create_login = require("./routes/login");
-
-const app = express();
-app.use(express.json()); 
-
-const cors = require("cors");
-app.use(cors());
 
 app.use("/api/uploads", express.static("uploads")); // Serve uploaded files
 app.use("/api/roles", create_role); 

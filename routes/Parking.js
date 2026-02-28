@@ -10,9 +10,9 @@ router.post("/create", auth,async (req, res) => {
 
     console.log("Incoming Data:", req.body);
 
-    const { driverName, driverNumber, vehicleNumber, vehicleId } = req.body;
+    const { driverName, driverNumber, vehicleNumber } = req.body;
 
-    if (!driverName || !driverNumber || !vehicleNumber || !vehicleId) {
+    if (!driverName || !driverNumber || !vehicleNumber) {
       return res.status(400).json({ message: "All fields required" });
     }
 
@@ -22,11 +22,10 @@ router.post("/create", auth,async (req, res) => {
       .input("DriverName", sql.VarChar, driverName)
       .input("DriverNumber", sql.VarChar, driverNumber)
       .input("VehicleNumber", sql.VarChar, vehicleNumber)
-      .input("VehicleId", sql.VarChar, vehicleId)
       .query(`
-        INSERT INTO Parking2 (DriverName, DriverNumber, VehicleNumber, VehicleId)
+        INSERT INTO Parking2 (DriverName, DriverNumber, VehicleNumber)
         OUTPUT INSERTED.*
-        VALUES (@DriverName, @DriverNumber, @VehicleNumber, @VehicleId)
+        VALUES (@DriverName, @DriverNumber, @VehicleNumber)
       `);
       
     res.status(200).json(result.recordset[0]);
@@ -55,7 +54,7 @@ router.put("/update/:id", auth, async (req, res) => {
   try {
 
     const { id } = req.params;
-    const { driverName, driverNumber, vehicleNumber, vehicleId } = req.body;
+    const { driverName, driverNumber, vehicleNumber} = req.body;
 
     const pool = await poolPromise;
 
@@ -64,13 +63,12 @@ router.put("/update/:id", auth, async (req, res) => {
       .input("DriverName", sql.VarChar, driverName)
       .input("DriverNumber", sql.VarChar, driverNumber)
       .input("VehicleNumber", sql.VarChar, vehicleNumber)
-      .input("VehicleId", sql.VarChar, vehicleId)
+      
       .query(`
         UPDATE Parking2
         SET DriverName=@DriverName,
             DriverNumber=@DriverNumber,
-            VehicleNumber=@VehicleNumber,
-            VehicleId=@VehicleId
+            VehicleNumber=@VehicleNumber
         WHERE Id=@Id
       `);
 
@@ -112,7 +110,6 @@ router.delete("/delete/:id",auth, async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 });
-
 
 
 module.exports = router;
